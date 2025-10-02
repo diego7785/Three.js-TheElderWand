@@ -13,64 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
     gsap.ticker.add((time) => lenis.raf(time * 1000));
     gsap.ticker.lagSmoothing(0);
 
-    const header1Split = new SplitText(".header-1 h1", {
-        type: "chars",
-        charsClass: "char",
-    });
-    const titleSplits = new SplitText(".tooltip .title h2", {
-        type: "lines",
-        linesClass: "line",
-    });
-    const descriptionSplits = new SplitText(".tooltip .description p", {
-        type: "lines",
-        linesClass: "line",
-    });
-
-    header1Split.chars.forEach(
-        (char) => (char.innerHTML = `<span>${char.innerHTML}</span>`)
-    );
-    [...titleSplits.lines, ...descriptionSplits.lines].forEach(
-        (line) => (line.innerHTML = `<span>${line.innerHTML}</span>`)
-    );
-
-    const animOptions = { duration: 1, ease: "power3.out", stagger: 0.025 };
-    const tooltipSelectors = [
-        {
-            trigger: 0.65,
-            elements: [
-                ".tooltip:nth-child(1) .icon ion-icon",
-                ".tooltip:nth-child(1) .title .line > span",
-                ".tooltip:nth-child(1) .description .line > span",
-            ],
-        },
-        {
-            trigger: 0.85,
-            elements: [
-                ".tooltip:nth-child(2) .icon ion-icon",
-                ".tooltip:nth-child(2) .title .line > span",
-                ".tooltip:nth-child(2) .description .line > span",
-            ],
-        },
-    ];
-
-    ScrollTrigger.create({
-        trigger: ".product-overview",
-        start: "75% bottom",
-        onEnter: () =>
-            gsap.to(".header-1 h1 .char > span", {
-                y: "0%",
-                duration: 1,
-                ease: "power3.out",
-                stagger: 0.025,
-            }),
-        onLeaveBack: () =>
-            gsap.to(".header-1 h1 .char > span", {
-                y: "100%",
-                duration: 1,
-                ease: "power3.out",
-                stagger: 0.025,
-            }),
-    });
+    // Removed text animations so everything is visible and smooth
 
     let model,
         currentRotation = 0,
@@ -168,54 +111,23 @@ document.addEventListener("DOMContentLoaded", () => {
     ScrollTrigger.create({
         trigger: ".product-overview",
         start: "top top",
-        end: `+=${window.innerHeight * 10}px`,
+        end: `+=${window.innerHeight * 2}px`,
         pin: true,
         pinSpacing: true,
         scrub: 1,
         onUpdate: ({ progress }) => {
-            const headerProgress = Math.max(0, Math.min(1, (progress - 0.05) / 0.3));
-            gsap.to(".header-1", {
-                xPercent:
-                    progress < 0.05 ? 0 : progress > 0.35 ? -100 : -100 * headerProgress,
-            });
+            // Move all content vertically based on scroll
+            const translateY = -progress * 100; // From 0% to -100%
+            
+            gsap.set(".header-1", { y: `${translateY}vh` });
+            gsap.set(".header-2", { y: `${translateY + 60}vh` });
+            gsap.set(".circular-mask", { y: `${translateY}vh` });
+            gsap.set(".tooltips", { y: `${translateY}vh` });
 
-            const maskSize =
-                progress < 0.2
-                    ? 0
-                    : progress > 0.3
-                        ? 100
-                        : 100 * ((progress - 0.2) / 0.1);
-            gsap.to(".circular-mask", {
-                clipPath: `circle(${maskSize}% at 50% 50%)`,
-            });
-
-            const header2Progress = (progress - 0.15) / 0.35;
-            const header2XPercent =
-                progress < 0.15
-                    ? 100
-                    : progress > 0.5
-                        ? -200
-                        : 100 - 300 * header2Progress;
-            gsap.to(".header-2", { xPercent: header2XPercent });
-
-            const scaleX =
-                progress < 0.45
-                    ? 0
-                    : progress > 0.65
-                        ? 100
-                        : 100 * ((progress - 0.45) / 0.2);
-            gsap.to(".tooltip .divider", { scaleX: `${scaleX}%`, ...animOptions });
-
-            tooltipSelectors.forEach(({ trigger, elements }) => {
-                gsap.to(elements, {
-                    y: progress >= trigger ? "0%" : "125%",
-                    ...animOptions,
-                });
-            });
-
-            if (model && progress >= 0.05) {
+            // Only the wand rotation animation
+            if (model && progress >= 0.1) {
                 const rotationProgress = progress;
-                const targetRotation = Math.PI * 3 * rotationProgress;
+                const targetRotation = Math.PI * 2 * rotationProgress;
                 const rotationDiff = targetRotation - currentRotation;
                 if (Math.abs(rotationDiff) > 0.001) {
                     model.rotateOnAxis(new THREE.Vector3(1, 0.2, 0.2), rotationDiff);
