@@ -30,24 +30,15 @@ document.addEventListener("DOMContentLoaded", () => {
     renderer.setClearColor(0x000000, 0);
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    renderer.outputEncoding = THREE.LinearEncoding;
-    renderer.toneMapping = THREE.NoToneMapping;
-    renderer.toneMappingExposure = 1.0;
     document.querySelector(".model-container").appendChild(renderer.domElement);
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+    scene.add(new THREE.AmbientLight(0xffffff, 2));
 
-    const mainLight = new THREE.DirectionalLight(0xffffff, 1.0);
-    mainLight.position.set(1, 2, 3);
-    mainLight.castShadow = true;
-    mainLight.shadow.bias = -0.001;
-    mainLight.shadow.mapSize.width = 1024;
-    mainLight.shadow.mapSize.height = 1024;
+    const mainLight = new THREE.DirectionalLight(0xffffff, 3);
+    mainLight.position.set(1, 1, 1);
     scene.add(mainLight);
 
-    const fillLight = new THREE.DirectionalLight(0xffffff, 0.5);
+    const fillLight = new THREE.DirectionalLight(0xffffff, 3.5);
     fillLight.position.set(-2, 0, -2);
     scene.add(fillLight);
 
@@ -77,15 +68,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     new GLTFLoader().load("/wand.glb", (gltf) => {
         model = gltf.scene;
-
-        model.traverse((node) => {
-            if (node.isMesh && node.material) {
-                Object.assign(node.material, {
-                    metalness: 0.05,
-                    roughness: 0.9,
-                });
-            }
-        });
 
         const box = new THREE.Box3().setFromObject(model);
         const size = box.getSize(new THREE.Vector3());
